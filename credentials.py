@@ -83,7 +83,7 @@ def encrypt_creds():
         password = encrypted_password
     )
     db.close()
-    print(f'\nInput for service {service_input} successfully saved! ')
+    print(f'\nInput for service "{service_input}" successfully saved! ')
 
 ## This fuction prompts for a service and password and querries the db for that service name (returns decrypted username and password)
 def decrypt_creds():
@@ -181,7 +181,7 @@ def delete_service():
         username = decrypted_username.decode()
         password = decrypted_password.decode()
         print(f'\n Service: {service_input} \n Username: {username} \n password: {password}\n' +
-             '- Successfully Deleted -')
+             '\n -!- Successfully Deleted -!-')
         db.close()
     except:
         print('\n\n ------ Incorect Password ------')
@@ -220,7 +220,7 @@ if __name__ == '__main__':
     
     
     while True:
-        answer = input('Welcome! \n\nWould you like to save an input? (A) \n' +
+        answer = input('\n\n +++ Welcome! +++ \n\nWould you like to save an input? (A) \n' +
                    'Would you like you like to make a querry? (B) \n'+
                       'Would you like to see all saved services? (C) \n' + 
                       'Would you like to delete a service? (D)\n' +
