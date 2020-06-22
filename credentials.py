@@ -43,7 +43,7 @@ def encrypt_creds():
         service_list.append(row.service)
 
     # Prompt for password, encode it and hash it into the encryption key to be used later.
-    pass_given = input('Please enter an encryption password:  ')
+    pass_given = input('Please enter an encryption password (REMEMBER THIS PASSWORD!):  ')
     password = pass_given.encode()
     salt = b'Y\xa8B\x85\x8d\x95\xe1\xb9\x0e\x19\x11\x17\x03.\n\x9d'
     kdf = PBKDF2HMAC(
@@ -61,7 +61,7 @@ def encrypt_creds():
     if service_input == 'exit':
         return
     if service_input in service_list:
-        print('\n Sorry, service already exists. Please try again.')
+        print('\n --- Sorry, service already exists. Please try again ---\n')
         db.close()
         encrypt_creds()
         return
@@ -84,7 +84,7 @@ def encrypt_creds():
         password = encrypted_password
     )
     db.close()
-    print(f'\nInput for service "{service_input}" successfully saved! ')
+    print(f'\n --- Input for service "{service_input}" successfully saved! --- ')
 
 ## This fuction prompts for a service and password and querries the db for that service name (returns decrypted username and password)
 def decrypt_creds():
@@ -222,14 +222,14 @@ if __name__ == '__main__':
     
     while True:
         answer = input('\n\n +++ Welcome! +++ \n\nWould you like to save an input? (A) \n' +
-                   'Would you like you like to make a querry? (B) \n'+
+                   'Would you like to make a query? (B) \n'+
                       'Would you like to see all saved services? (C) \n' + 
                       'Would you like to delete a service? (D)\n' +
                        '---(Q or E to exit )--- \n')
             
         if answer.lower() not in choices:
             print('\n --------!! Sorry, Please make a' + 
-                  'valid choice of either (A),(B),(C) !!----------')
+                  'valid choice of either (A),(B),(C),(D) !!----------')
             continue
         elif answer.lower() == 'a':
             encrypt_creds()
