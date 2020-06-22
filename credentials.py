@@ -29,8 +29,9 @@ class Credentials(Model):
         database = db
         table_name = 'credentials'
         
-#db.connect()
-#db.create_tables([Credentials])
+db.connect()
+db.create_tables([Credentials])
+db.close()
 
 
 ## This function prompts for a password (used to encrypt credentials), service (reddit, youtube, facebook, bank etc.), a username and password.
