@@ -204,9 +204,13 @@ def delete_service():
 # This function lists the service name of all saved entries
 def show_services():    
     db.connect()
-    print('\n\n--------\n')
+    service_list = []
     for row in Credentials.select():
-        print(row.service)
+        service_list.append(row.service.capitalize())
+    service_list.sort()
+    print('\n\n--------\n')
+    for service in service_list:
+        print(service)
     print('\n--------')
     db.close()   
 
@@ -217,29 +221,29 @@ def show_services():
 # Main logic of program. Prompt user to choose to make an entry, a querry or list saved services. 
 # Call the correct function acoriding to user input. 
 if __name__ == '__main__':
-    choices = ['a','b','c','d','q','e']
+    choices = ['a','r','l','d','q','e']
     
     
     while True:
-        answer = input('\n\n +++ Welcome! +++ \n\nWould you like to save an input? (A) \n' +
-                   'Would you like to make a query? (B) \n'+
-                      'Would you like to see all saved services? (C) \n' + 
+        answer = input('\n\n +++ Welcome! +++ \n\nWould you like add a service? (A) \n' +
+                   "Would you like to retreive a service's credentials? (R) \n"+
+                      'Would you like to list all saved services? (L) \n' + 
                       'Would you like to delete a service? (D)\n' +
                        '---(Q or E to exit )--- \n')
             
         if answer.lower() not in choices:
             print('\n --------!! Sorry, Please make a' + 
-                  'valid choice of either (A),(B),(C),(D) !!----------')
+                  'valid choice of either (A),(R),(L),(D) !!----------')
             continue
         elif answer.lower() == 'a':
             encrypt_creds()
             db.close()
             continue
-        elif answer.lower() == 'b':
+        elif answer.lower() == 'r':
             decrypt_creds()
             db.close()
             continue
-        elif answer.lower() == 'c':
+        elif answer.lower() == 'l':
             show_services()
             continue
         elif answer.lower() == 'd':
