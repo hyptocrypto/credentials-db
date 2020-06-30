@@ -258,6 +258,24 @@ class AddPage(Frame):
 
 
 
+class QuerryPage(Frame):
+    def __init__(self, master):
+        Frame.__init__(self, master)
+        back_buttion = Button(self, text = '<-- BACK  ', command = lambda: master.switch_frame(StartPage))
+        back_buttion.grid(row = 0, column = 0, padx = 0, pady = 0)
+
+        query_label = Label(self, text = 'Please enter a service name', font = ('Helvetica', 20)
+        query_label.grid(row = 2, column = 2)
+
+
+class DeletePage(Frame):
+    def __init__(self, master):
+        Frame.__init__(self, master)
+        back_buttion = Button(self, text = '<-- BACK  ', command = lambda: master.switch_frame(StartPage))
+        back_buttion.grid(row = 0, column = 0, padx = 0, pady = 0)
+        
+        delete_label = Label(self, text = 'Please enter a service name', font = ('Helvetica', 20))
+        query_label.grid(row = 2, column = 2)
 
 
 
