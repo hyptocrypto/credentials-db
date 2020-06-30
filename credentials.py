@@ -225,8 +225,8 @@ if __name__ == '__main__':
     
     
     while True:
-        answer = input('\n\n +++ Welcome! +++ \n\nWould you like add a service? (A) \n' +
-                   "Would you like to retreive a service's credentials? (R) \n"+
+        answer = input('\n\n +++ Welcome! +++ \n\nWould you like to add a service? (A) \n' +
+                   "Would you like to retrieve a service's credentials? (R) \n"+
                       'Would you like to list all saved services? (L) \n' + 
                       'Would you like to delete a service? (D)\n' +
                        '---(Q or E to exit )--- \n')
