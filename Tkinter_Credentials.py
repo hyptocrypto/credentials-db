@@ -121,21 +121,18 @@ class ShowSavedServices(Frame):
             list_box.insert(END, item)
         db.close()
         
+        def double_clicked(event):
+            decrypt_pop_up(self, f'Please enter the password used to save "{list_box.get(ANCHOR).lower()}" service')
+        list_box.bind('<Double-Button-1>', double_clicked)
 
-        item = list_box.get(ANCHOR).lower()
 
-        # def select():
-        #     test_label.config(text = list_box.get(ANCHOR).lower())
-        #     test_label = Label(self, text = '')
-        #     test_label.pack(pady = 5)
+
 
         select_button = Button(self, text = 'Select', command = lambda: decrypt_pop_up(self, f'Please enter the password used to save "{list_box.get(ANCHOR).lower()}" service'), height = 3, width = 15)
         select_button.pack(side = LEFT)
 
         delete_button = Button(self, text = 'Delete', command = lambda: delete_pop_up(self, f'Please enter the password used to save "{list_box.get(ANCHOR).lower()}" service'), height = 3, width = 15)
         delete_button.pack(side = RIGHT)
-
-
 
 
         def decrypt_pop_up(self,msg):
@@ -149,6 +146,12 @@ class ShowSavedServices(Frame):
             space_label.pack()
             pass_entry = Entry(pop_up, width = 30, font = ('Helvetica', 15))
             pass_entry.pack()
+            
+            def enter_key(event):
+                QuerryPage.decrypt_creds(self, list_box.get(ANCHOR), pass_entry.get())
+                pop_up.destroy
+            pass_entry.bind('<Return>', enter_key)
+            
             
 
             select_button = Button(pop_up, text = 'Submit', command = lambda: [pop_up.destroy, QuerryPage.decrypt_creds(self, list_box.get(ANCHOR), pass_entry.get())], height = 3, width = 15)
@@ -265,6 +268,11 @@ class AddPage(Frame):
         space_label = Label(self, text = '  ')
         space_label.pack()
 
+        ## Function to submit the form when pressing enter in the final text feild 
+        def enter_key(event):
+            self.encrypt_creds(service_entry.get(), encrypt_pass_entry.get(), username_entry.get(), password_entry.get())
+            master.switch_frame(ShowSavedServices)
+        password_entry.bind('<Return>', enter_key)
 
         ## Button to submit info and run the encrypt_creds funciton
         sumbit_button = Button(self, text = 'SUBMIT', height = 1, width = 5, padx = 50, pady = 15, command = lambda: [self.encrypt_creds(service_entry.get(), encrypt_pass_entry.get(), username_entry.get(), password_entry.get()), 
@@ -366,6 +374,11 @@ class QuerryPage(Frame):
         space_label = Label(self, text = '  ')
         space_label.pack()
 
+        def enter_key(event):
+            self.decrypt_creds(query_entry.get(), pass_entry.get())
+            pop_up.destroy
+        pass_entry.bind('<Return>', enter_key)
+
         ## Button to submit and fun decrypt_creds function 
         sumbit_button = Button(self, height = 1, width = 5, padx = 50, pady = 15, text = 'SUBMIT', command = lambda: self.decrypt_creds(query_entry.get(), pass_entry.get()))
         sumbit_button.pack()
@@ -390,7 +403,7 @@ class QuerryPage(Frame):
 
 
         pop_up.wm_title(' SUCCESS !')
-        label = Label(pop_up, text = f'{service.capitalize()} Credentials Deleted', font = ("Helvetica", 25))
+        label = Label(pop_up, text = f'{service.capitalize()} Credentials', font = ("Helvetica", 25))
         label.pack(side = 'top', fill = 'x', pady = 10)
 
         list_box = Listbox(pop_up, font = ("Helvetica", 20), height = 4, width = 40)
