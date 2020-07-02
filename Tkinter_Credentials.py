@@ -1,3 +1,9 @@
+'''
+This program lets you store login credentials in an encrypted database. 
+Upon each entry you are prompted for a password, this password is used to encypt and decrypt the credentials. 
+Make sure you remember this password because without it you can not decrypt the saved credentials!!
+'''
+
 from tkinter import *
 import os
 import sys
@@ -8,9 +14,8 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.fernet import Fernet
 from peewee import *
 
-
+## Initalize Database
 db = SqliteDatabase('credentials.db')
-
 
 class Credentials(Model):
     service = CharField(null = True)
@@ -27,13 +32,13 @@ db.close()
 
 
 
-
+## Initialize a main instance of Tk()
 class Credentials_DB(Tk):
     def __init__(self):
         Tk.__init__(self)
         self._frame = None
         self.switch_frame(StartPage)
-
+## Function to switch between pages
     def switch_frame(self, frame_class):
         new_frame = frame_class(self)
         if self._frame is not None:
@@ -41,120 +46,211 @@ class Credentials_DB(Tk):
         self._frame = new_frame
         self._frame.pack()
 
-
+## Setup main page
 class StartPage(Frame):
     def __init__(self, master):
         Frame.__init__(self, master)
+
+        ## Title
+        welcome_label = Label(self, text = 'Welcome! \n Please make a selection', font = ("Helvetica", 30))
+        welcome_label.pack()
+        space_label = Label(self, text = '- - - - - - - - - - - - - - - - - - - - - - - - - ', padx = 50, font = ("Helvetica", 20) )
+        space_label.pack()
+        space_label = Label(self, text = '  ' )
+        space_label.pack()
         
+        ## Label and Button to add to database
+        add_button_label = Label(self, text = 'Add a new service', font = ("Helvetica", 22))
+        add_button_label.pack()
+        add_button = Button(self, text = 'ADD', height = 1, width = 5, padx = 50, pady = 15, command = lambda: master.switch_frame(AddPage))
+        add_button.pack()
+        space_label = Label(self, text = '  ' )
+        space_label.pack()
 
-        #window = Tk()
-        #window.title('Credentials_DB')
-        #window.geometry('700x500')
+        ## Label and Button to query database
+        querry_button_label = Label(self, padx = 5, text = 'Retrieve credentials for a service', font = ("Helvetica", 22))
+        querry_button_label.pack()
+        querry_button = Button(self, text = 'QUERY', height = 1, width = 5, padx = 50, pady = 15, command = lambda: master.switch_frame(QuerryPage))
+        querry_button.pack()
+        space_label = Label(self, text = '  ' )
+        space_label.pack()
 
-        space_label = Label(self, text = '     ')
-        space_label.grid(row = 1, column = 3)
+        ## Label and Button to delete a service from the database
+        delete_button_label = Label(self, text = 'Delete a saved service', font = ("Helvetica", 22))
+        delete_button_label.pack()
+        delete_button = Button(self, text = 'DELETE', height = 1, width = 5, padx = 50, pady = 15, command = lambda: master.switch_frame(DeletePage))
+        delete_button.pack()
+        space_label = Label(self, text = '  ' )
+        space_label.pack()
 
-        welcome_label = Label(self, text = 
-        'Welcome!\nPlease make a selection\n\n\n', font = ("Helvetica", 30))
-        welcome_label.grid(row = 1, column = 2, padx = 20)
+        ## Label and Button to list all services saved in the database
+        list_button_label = Label(self, text = 'List all saved services', font = ("Helvetica", 22))
+        list_button_label.pack()        
+        list_button = Button(self, text = 'LIST', height = 1, width = 5, padx = 50, pady = 15, command = lambda: master.switch_frame(ShowSavedServices))
+        list_button.pack()
+        space_label = Label(self, text = '  ' )
+        space_label.pack()
 
-        add_button = Button(self, text = 'ADD', padx = 50, pady = 15, command = lambda: master.switch_frame(AddPage))
-        add_button.grid(row = 2, column = 3, padx = (100, 100))
-        add_button_label = Label(self, text = 'Add a service to the DataBase --->', font = ("Helvetica", 22))
-        add_button_label.grid(row = 2, column = 1)
-
-        querry_button = Button(self, text = 'QUERY', padx = 50, pady = 15, command = lambda: master.switch_frame(QuerryPage))
-        querry_button.grid(row = 3, column = 3)
-        querry_button_label = Label(self, text = 'Retrieve credentials form the DataBase --->', font = ("Helvetica", 22))
-        querry_button_label.grid(row = 3, column = 1)
-
-        delete_button = Button(self, text = 'DELETE', padx = 50, pady = 15, command = lambda: master.switch_frame(DeletePage))
-        delete_button.grid(row = 4, column = 3)
-        delete_button_label = Label(self, text = 'Delete a saved service --->', font = ("Helvetica", 22))
-        delete_button_label.grid(row = 4, column = 1)
-
-        list_button = Button(self, text = 'LIST', padx = 50, pady = 15, command = lambda: master.switch_frame(ShowSavedServices))
-        list_button.grid(row = 5, column = 3)
-        list_button_label = Label(self, text = 'List all saved services --->', font = ("Helvetica", 22))
-        list_button_label.grid(row = 5, column = 1)
-
-
+## Page to show all saved services 
 class ShowSavedServices(Frame):
     def __init__(self, master):
         Frame.__init__(self, master)
 
+        ## Title
         list_label = Label(self, text = 'Saved Services', font = ("Helvetica", 30))
-        list_label.grid(row = 0, column = 0)
+        list_label.pack()
 
         db.connect()
 
+        ## Initialze a list box to list all the saved servieces 
         list_box = Listbox(self, font = ("Helvetica", 25))
-        list_box.grid(row = 2, column = 0)
+        list_box.pack()
 
+        ## Create list of saved service by querying databse
         service_list = []
         for row in Credentials.select():
             service_list.append(row.service.capitalize())
         service_list.sort()
 
+        ## List saved services into the list box initalized above
         for item in service_list:
             list_box.insert(END, item)
         db.close()
         
 
-        home_button = Button(self, text = 'HOME', command = lambda: master.switch_frame(StartPage), height = 3, width = 15)
-        home_button.grid(row = 4, column = 0, padx = 0, pady = 0)
+        item = list_box.get(ANCHOR).lower()
 
-      
+        # def select():
+        #     test_label.config(text = list_box.get(ANCHOR).lower())
+        #     test_label = Label(self, text = '')
+        #     test_label.pack(pady = 5)
+
+        select_button = Button(self, text = 'Select', command = lambda: decrypt_pop_up(self, f'Please enter password used to save "{list_box.get(ANCHOR).lower()}" service'))
+        select_button.pack()
+
+        def decrypt_pop_up(self,msg):
+            pop_up = Tk()
+            pop_up.geometry('600x180')
+            
+            pop_up.wm_title(' ERROR !')
+            label = Label(pop_up, text = msg, font = ("Helvetica", 20))
+            label.pack(side = 'top', fill = 'x', pady = 10)
+            space_label = Label(pop_up, '', padx = 10)
+            space_label.pack()
+            pass_entry = Entry(pop_up, width = 30, font = ('Helvetica', 15))
+            pass_entry.pack()
+            print(pass_entry.get())
+
+            select_button = Button(pop_up, text = 'Submit', command = lambda: [pop_up.destroy, QuerryPage.decrypt_creds(self, list_box.get(ANCHOR), pass_entry.get())], height = 3, width = 15)
+            select_button.pack()
+            db.close()
+            pop_up.mainloop()
+
+        def success_pop_up(self, service, username, password):
+            pop_up = Tk()
+            pop_up.geometry('600x200')
 
 
+            pop_up.wm_title(' SUCCESS !')
+            label = Label(pop_up, text = f'{service.capitalize()} Credentials', font = ("Helvetica", 25))
+            label.pack(side = 'top', fill = 'x', pady = 10)
+
+            list_box = Listbox(pop_up, font = ("Helvetica", 20), height = 4, width = 40)
+            list_box.pack()
+            cred_list = [f'Username:   {username}', f'Password:   {password}']
+            
+            for item in cred_list:
+                list_box.insert(END, item)
+            
+
+
+            button1 = Button(pop_up, text = 'Okay', command = pop_up.destroy, height = 3, width = 15)
+            button1.pack()
+            db.close()
+            pop_up.mainloop()         
+
+        ## Button to return to StartPage
+        home_button = Button(self, text = 'BACK', command = lambda: master.switch_frame(StartPage), height = 3, width = 15)
+        home_button.pack(anchor = NW)
+
+    ## Error popup window
+    def pop_up(self,msg):
+        pop_up = Tk()
+        pop_up.geometry('600x180')
+        
+        pop_up.wm_title(' ERROR !')
+        label = Label(pop_up, text = msg, font = ("Helvetica", 20))
+        label.pack(side = 'top', fill = 'x', pady = 10)
+        button1 = Button(pop_up, text = 'Okay', command = pop_up.destroy, height = 3, width = 15)
+        button1.pack()
+        db.close()
+        pop_up.mainloop()  
+
+
+## Page to add service to database
 class AddPage(Frame):
     def __init__(self, master):
         Frame.__init__(self, master)
 
-        back_buttion = Button(self, text = '<-- BACK  ', command = lambda: master.switch_frame(StartPage))
-        back_buttion.grid(row = 0, column = 0, padx = 0, pady = 0)
+        ## Button to return to StartPage 
+        back_button = Button(self, height = 1, width = 5, padx = 50, pady = 15, text = '<-- BACK  ', command = lambda: master.switch_frame(StartPage))
+        back_button.pack(anchor = NW)
 
+        ## Spacing to give page a wider layout
         space_label = Label(self, text = '     ')
-        space_label.grid(row = 1, column = 3)
+        space_label.pack()
 
+        ## Title
         add_page_label = Label(self, text = 'Add Service To DataBase', font = ('Helvetica', 26))
-        add_page_label.grid(row = 1 , column = 2)
+        add_page_label.pack()
+        space_label = Label(self, text = '  ')
+        space_label.pack()
 
-        service_entry_label = Label(self, text = 'Please enter a service name --->', font = ('Helvetica', 18))
-        service_entry_label.grid(row = 3, column = 1)
-        service_entry = Entry(self, width = 40)
-        service_entry.grid(row = 3, column = 3, padx = 10)
+        ## Title and text feild for the name of a service 
+        service_entry_label = Label(self, text = 'Please enter a service name', font = ('Helvetica', 18))
+        service_entry_label.pack()
+        service_entry = Entry(self, width = 40, font = ('Helvetica', 18))
+        service_entry.pack()
+        space_label = Label(self, text = '  ')
+        space_label.pack()
        
-
-        encrypt_pass_label = Label(self, text = 'Please enter an encryption password (REMEMBER THIS PASSWORD!!!) --->', font = ('Helvetica', 18))
-        encrypt_pass_label.grid(row = 4, column = 1)
-        encrypt_pass_entry = Entry(self, width = 40)
-        encrypt_pass_entry.grid(row = 4, column = 3, padx = 10)
+        ## Title and text feild for the encryption password 
+        encrypt_pass_label = Label(self, text = 'Please enter an encryption password (REMEMBER THIS PASSWORD!!!)', padx = 50, font = ('Helvetica', 18))
+        encrypt_pass_label.pack()
+        encrypt_pass_entry = Entry(self, width = 40, font = ('Helvetica', 18))
+        encrypt_pass_entry.pack()
+        space_label = Label(self, text = '  ')
+        space_label.pack()        
   
+        ## Title and text feild for the username
+        username_label = Label(self, text = 'Please enter a service username', font = ('Helvetica', 18))
+        username_label.pack()
+        username_entry = Entry(self,width = 40, font = ('Helvetica', 18))
+        username_entry.pack()
+        space_label = Label(self, text = '  ')
+        space_label.pack()
 
-        username_label = Label(self, text = 'Please enter a service username --->', font = ('Helvetica', 18))
-        username_label.grid(row = 5, column = 1)
-        username_entry = Entry(self,width = 40)
-        username_entry.grid(row = 5, column = 3, padx = 10)
-       
+        ## Title and text feild for the password
+        password_label = Label(self, text = 'Please enter a service password', font = ('Helvetica', 18))
+        password_label.pack()
+        password_entry = Entry(self, width = 40, font = ('Helvetica', 18))
+        password_entry.pack()
+        space_label = Label(self, text = '  ')
+        space_label.pack()
 
-        password_label = Label(self, text = 'Please enter a service password --->', font = ('Helvetica', 18))
-        password_label.grid(row = 6, column = 1)
-        password_entry = Entry(self, width = 40)
-        password_entry.grid(row = 6, column = 3, padx = 20)
-       
 
-        sumbit_button = Button(self, text = 'SUBMIT', command = lambda: [self.encrypt_creds(service_entry.get(), encrypt_pass_entry.get(), username_entry.get(), password_entry.get()), 
+        ## Button to submit info and run the encrypt_creds funciton
+        sumbit_button = Button(self, text = 'SUBMIT', height = 1, width = 5, padx = 50, pady = 15, command = lambda: [self.encrypt_creds(service_entry.get(), encrypt_pass_entry.get(), username_entry.get(), password_entry.get()), 
                                                                          master.switch_frame(ShowSavedServices) ] )
-        sumbit_button.grid(row = 7, column = 2)
+        sumbit_button.pack()
 
-
+        
+    ## Error popup window
     def pop_up(self,msg):
         pop_up = Tk()
         pop_up.geometry('600x180')
-
-
-        pop_up.wm_title('! ERROR !')
+        
+        pop_up.wm_title(' ERROR !')
         label = Label(pop_up, text = msg, font = ("Helvetica", 20))
         label.pack(side = 'top', fill = 'x', pady = 10)
         button1 = Button(pop_up, text = 'Okay', command = pop_up.destroy, height = 3, width = 15)
@@ -162,22 +258,19 @@ class AddPage(Frame):
         db.close()
         pop_up.mainloop()        
 
+    ## Function encrypt and save the credentials
     def encrypt_creds(self, service_entry, encrypt_pass_entry, username_entry, password_entry):
         service = service_entry.lower()
         service = service.strip()
-
-        
+ 
         db.connect()
-        print('connected')
+        
         # Make a list of saved services so there can be no two entries with the same service name
         service_list = []
         for row in Credentials.select():
             service_list.append(row.service)
-        print('madelist')
-        print(service_list)
 
-        # encode encrypt_pass, hash it into the encryption key to be used later.
-        
+        # Encode encrypt_pass, hash it into the encryption key to be used later
         password = encrypt_pass_entry.encode()
         salt = b'Y\xa8B\x85\x8d\x95\xe1\xb9\x0e\x19\x11\x17\x03.\n\x9d'
         kdf = PBKDF2HMAC(
@@ -188,76 +281,75 @@ class AddPage(Frame):
         backend = default_backend()
         )
         key = base64.urlsafe_b64encode(kdf.derive(password))
-        print('encrypted key')
-        
-        # Prompt for name of service, check for exit and check if the name already exists in the db 
 
+        
+        # Check if the service name already exists in the data base  
         if service_entry in service_list:
             self.pop_up('Sercive already exists!! please try again!')
             db.close()
             return
 
-    
-        print('checked if service exists')
-        # Prompt for username and encrypt it
-        
+        # Encode and encrypt username
         encoded_username = username_entry.encode()
         f = Fernet(key)
         encrypted_username = f.encrypt(encoded_username)
-        print('encrypted username0')
 
-        # Prompt for password and encrypt it
-        
+        # Encode and encrypt password 
         encoded_password = password_entry.encode()
         encrypted_password = f.encrypt(encoded_password)
-        print('encrypted pass')
-        # Create new entry in the db
+        
+        # Create new entry in the database
         Credentials.create(
             service = service,
             username = encrypted_username,
             password = encrypted_password
         )
-        print('creds saved')
         db.close()
 
-        lambda: self.master.switch_frame(ShowSavedServices)
         
 
-
-
-
-
-
-
+## Page to querry the database for credentials
 class QuerryPage(Frame):
     def __init__(self, master):
         Frame.__init__(self, master)
-        back_buttion = Button(self, text = '<-- BACK  ', command = lambda: master.switch_frame(StartPage))
-        back_buttion.grid(row = 0, column = 1, padx = 0, pady = 0)
 
+        ## Button to go back to StartPage
+        back_buttion = Button(self, height = 1, width = 4, padx = 50, pady = 15, text = '<-- BACK  ', command = lambda: master.switch_frame(StartPage))
+        back_buttion.pack(anchor = NW)
+
+        ## Title
         title_label = Label(self, text = 'Retrieve Credentials', font = ('Helvetica', 26))
-        title_label.grid(row = 0, column = 2)
+        title_label.pack()
+        space_label = Label(self, text = '  ')
+        space_label.pack()
 
-        query_label = Label(self, text = 'Please enter a service name --->', font = ('Helvetica', 18))
-        query_label.grid(row = 3, column = 1)
-        query_entry = Entry(self, width = 40)
-        query_entry.grid(row = 3, column = 3)
+        ## Title and text feild for name of service
+        query_label = Label(self, text = 'Please enter a service name', font = ('Helvetica', 18))
+        query_label.pack()
+        query_entry = Entry(self, width = 40, font = ('Helvetica', 18))
+        query_entry.pack()
+        space_label = Label(self, text = '  ')
+        space_label.pack()        
 
-        pass_label = Label(self, text = 'Please enter the encryption password used to save this service --->', font = ('Helvetica', 18))
-        pass_label.grid(row = 4, column = 1)
-        pass_entry = Entry(self, width = 40)
-        pass_entry.grid(row = 4, column = 3) 
+        ## Title and text feild for encryption password
+        pass_label = Label(self, text = 'Please enter the encryption password used to save this service', padx = 50, font = ('Helvetica', 18))
+        pass_label.pack()
+        pass_entry = Entry(self, width = 40, font = ('Helvetica', 18))
+        pass_entry.pack() 
+        space_label = Label(self, text = '  ')
+        space_label.pack()
 
-        sumbit_button = Button(self, text = 'SUBMIT', command = lambda: self.decrypt_creds(query_entry.get(), pass_entry.get()))
-        sumbit_button.grid(row = 7, column = 2)
+        ## Button to submit and fun decrypt_creds function 
+        sumbit_button = Button(self, height = 1, width = 5, padx = 50, pady = 15, text = 'SUBMIT', command = lambda: self.decrypt_creds(query_entry.get(), pass_entry.get()))
+        sumbit_button.pack()
 
-
+    ## Eorro popup window 
     def pop_up(self,msg):
         pop_up = Tk()
         pop_up.geometry('600x180')
 
 
-        pop_up.wm_title('! ERROR !')
+        pop_up.wm_title(' ERROR !')
         label = Label(pop_up, text = msg, font = ("Helvetica", 20))
         label.pack(side = 'top', fill = 'x', pady = 10)
         button1 = Button(pop_up, text = 'Okay', command = pop_up.destroy, height = 3, width = 15)
@@ -270,7 +362,7 @@ class QuerryPage(Frame):
         pop_up.geometry('600x200')
 
 
-        pop_up.wm_title('! SUCCESS !')
+        pop_up.wm_title(' SUCCESS !')
         label = Label(pop_up, text = f'{service.capitalize()} Credentials', font = ("Helvetica", 25))
         label.pack(side = 'top', fill = 'x', pady = 10)
 
@@ -336,7 +428,7 @@ class QuerryPage(Frame):
             self.success_pop_up(service_input, username, password)
             db.close()
         except:
-            self.pop_up('Incorect Password!')
+            self.pop_up('Incorrect Password!')
             db.close()
             return
 
@@ -348,31 +440,37 @@ class QuerryPage(Frame):
 class DeletePage(Frame):
     def __init__(self, master):
         Frame.__init__(self, master)
-        back_buttion = Button(self, text = '<-- BACK  ', command = lambda: master.switch_frame(StartPage))
-        back_buttion.grid(row = 0, column = 1, padx = 0, pady = 0)
+        back_buttion = Button(self, height = 1, width = 5, padx = 50, pady = 15, text = '<-- BACK  ', command = lambda: master.switch_frame(StartPage))
+        back_buttion.pack(anchor = NW)
 
         title_label = Label(self, text = 'Delete Credentials', font = ('Helvetica', 26))
-        title_label.grid(row = 0, column = 2)
+        title_label.pack()
+        space_label = Label(self, text = '  ')
+        space_label.pack()
 
-        delete_label = Label(self, text = 'Please enter the name of the service you would like to delete -->', font = ('Helvetica', 18))
-        delete_label.grid(row = 3, column = 1)
+        delete_label = Label(self, text = 'Please enter the name of the service you would like to delete', padx = 50, font = ('Helvetica', 18))
+        delete_label.pack()
         delete_entry = Entry(self, width = 40)
-        delete_entry.grid(row = 3, column = 3)
+        delete_entry.pack()
+        space_label = Label(self, text = '  ')
+        space_label.pack()
 
-        pass_label = Label(self, text = 'Please enter the encryption password used to save this service -->', font = ('Helvetica', 18))
-        pass_label.grid(row = 4, column = 1)
+        pass_label = Label(self, text = 'Please enter the encryption password used to save this service', padx = 50, font = ('Helvetica', 18))
+        pass_label.pack()
         pass_entry = Entry(self, width = 40)
-        pass_entry.grid(row = 4, column = 3) 
+        pass_entry.pack() 
+        space_label = Label(self, text = '  ')
+        space_label.pack()
 
-        sumbit_button = Button(self, text = 'SUBMIT', command = lambda: self.delete_service(delete_entry.get(), pass_entry.get()))
-        sumbit_button.grid(row = 7, column = 2)
+        sumbit_button = Button(self, height = 1, width = 5, padx = 50, pady = 15, text = 'SUBMIT', command = lambda: self.delete_service(delete_entry.get(), pass_entry.get()))
+        sumbit_button.pack()
 
     def pop_up(self,msg):
         pop_up = Tk()
         pop_up.geometry('600x180')
 
 
-        pop_up.wm_title('! ERROR !')
+        pop_up.wm_title(' ERROR !')
         label = Label(pop_up, text = msg, font = ("Helvetica", 20))
         label.pack(side = 'top', fill = 'x', pady = 10)
         button1 = Button(pop_up, text = 'Okay', command = pop_up.destroy, height = 3, width = 15)
@@ -385,7 +483,7 @@ class DeletePage(Frame):
         pop_up.geometry('600x200')
 
 
-        pop_up.wm_title('! SUCCESS !')
+        pop_up.wm_title(' SUCCESS !')
         label = Label(pop_up, text = f'{service.capitalize()} Credentials Deleted', font = ("Helvetica", 25))
         label.pack(side = 'top', fill = 'x', pady = 10)
 
@@ -451,26 +549,7 @@ class DeletePage(Frame):
         except:
             self.pop_up('Incorect Password!')
             return
-        # Check to see if service exits in database, if so, service is deleted.   
-        # try:
-        #     delete =Credentials.delete().where(Credentials.service == service_input)
-        #     delete.execute()
-        # except Credentials.DoesNotExist:
-        #     self.pop_up(f'Sorry, service "{service_input}" does not exist')
-        #     db.close()
-        #     return
-
-
-# entry_lable = Label(window, text='Please enter your name -->').grid(row = 2, column = 0)
-# e = Entry(window, width=30).grid(row = 2, column = 1)
-
-# def myClick():
-#     hello = 'Thank you for your submition of ' + e.get()
-#     myLabel = Label(window, text=hello)
-#     myLabel.grid(row = 4, column = 1)
-
-# myButton = Button(window, text='Enter your name', command=myClick)
-# myButton.grid(row = 2, column = 2)
+   
 
 if __name__ == '__main__':
 
