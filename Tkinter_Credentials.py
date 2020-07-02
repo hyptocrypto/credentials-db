@@ -96,6 +96,10 @@ class ShowSavedServices(Frame):
     def __init__(self, master):
         Frame.__init__(self, master)
 
+        ## Back button
+        back_button = Button(self, text = 'BACK', command = lambda: master.switch_frame(StartPage), height = 2, width = 5)
+        back_button.pack(anchor = NW)
+
         ## Title
         list_label = Label(self, text = 'Saved Services', font = ("Helvetica", 30))
         list_label.pack()
@@ -125,53 +129,76 @@ class ShowSavedServices(Frame):
         #     test_label = Label(self, text = '')
         #     test_label.pack(pady = 5)
 
-        select_button = Button(self, text = 'Select', command = lambda: decrypt_pop_up(self, f'Please enter password used to save "{list_box.get(ANCHOR).lower()}" service'))
-        select_button.pack()
+        select_button = Button(self, text = 'Select', command = lambda: decrypt_pop_up(self, f'Please enter the password used to save "{list_box.get(ANCHOR).lower()}" service'), height = 3, width = 15)
+        select_button.pack(side = LEFT)
+
+        delete_button = Button(self, text = 'Delete', command = lambda: delete_pop_up(self, f'Please enter the password used to save "{list_box.get(ANCHOR).lower()}" service'), height = 3, width = 15)
+        delete_button.pack(side = RIGHT)
+
+
+
 
         def decrypt_pop_up(self,msg):
             pop_up = Tk()
             pop_up.geometry('600x180')
             
-            pop_up.wm_title(' ERROR !')
-            label = Label(pop_up, text = msg, font = ("Helvetica", 20))
+            pop_up.wm_title('Retrieve Credentials')
+            label = Label(pop_up, text = msg, font = ("Helvetica", 20), padx = 50)
             label.pack(side = 'top', fill = 'x', pady = 10)
             space_label = Label(pop_up, '', padx = 10)
             space_label.pack()
             pass_entry = Entry(pop_up, width = 30, font = ('Helvetica', 15))
             pass_entry.pack()
-            print(pass_entry.get())
+            
 
             select_button = Button(pop_up, text = 'Submit', command = lambda: [pop_up.destroy, QuerryPage.decrypt_creds(self, list_box.get(ANCHOR), pass_entry.get())], height = 3, width = 15)
             select_button.pack()
             db.close()
             pop_up.mainloop()
 
-        def success_pop_up(self, service, username, password):
+
+        def delete_pop_up(self,msg):
             pop_up = Tk()
-            pop_up.geometry('600x200')
-
-
-            pop_up.wm_title(' SUCCESS !')
-            label = Label(pop_up, text = f'{service.capitalize()} Credentials', font = ("Helvetica", 25))
+            pop_up.geometry('600x180')
+            
+            pop_up.wm_title('Delete Service')
+            label = Label(pop_up, text = msg, font = ("Helvetica", 20), padx = 50)
             label.pack(side = 'top', fill = 'x', pady = 10)
-
-            list_box = Listbox(pop_up, font = ("Helvetica", 20), height = 4, width = 40)
-            list_box.pack()
-            cred_list = [f'Username:   {username}', f'Password:   {password}']
-            
-            for item in cred_list:
-                list_box.insert(END, item)
+            space_label = Label(pop_up, '', padx = 10)
+            space_label.pack()
+            pass_entry = Entry(pop_up, width = 30, font = ('Helvetica', 15))
+            pass_entry.pack()
             
 
-
-            button1 = Button(pop_up, text = 'Okay', command = pop_up.destroy, height = 3, width = 15)
-            button1.pack()
+            select_button = Button(pop_up, text = 'Delete', command = lambda: [pop_up.destroy, DeletePage.delete_service(self, list_box.get(ANCHOR), pass_entry.get())], height = 3, width = 15)
+            select_button.pack()
             db.close()
-            pop_up.mainloop()         
+            pop_up.mainloop()
 
-        ## Button to return to StartPage
-        home_button = Button(self, text = 'BACK', command = lambda: master.switch_frame(StartPage), height = 3, width = 15)
-        home_button.pack(anchor = NW)
+    def success_pop_up(self, service, username, password):
+        pop_up = Tk()
+        pop_up.geometry('600x200')
+
+
+        pop_up.wm_title(' SUCCESS !')
+        label = Label(pop_up, text = f'{service.capitalize()} Credentials', font = ("Helvetica", 25))
+        label.pack(side = 'top', fill = 'x', pady = 10)
+
+        list_box = Listbox(pop_up, font = ("Helvetica", 20), height = 4, width = 40)
+        list_box.pack()
+        cred_list = [f'Username:   {username}', f'Password:   {password}']
+        
+        for item in cred_list:
+            list_box.insert(END, item)
+        
+
+
+        button1 = Button(pop_up, text = 'Okay', command = pop_up.destroy, height = 3, width = 15)
+        button1.pack()
+        db.close()
+        pop_up.mainloop()         
+
+
 
     ## Error popup window
     def pop_up(self,msg):
@@ -363,7 +390,7 @@ class QuerryPage(Frame):
 
 
         pop_up.wm_title(' SUCCESS !')
-        label = Label(pop_up, text = f'{service.capitalize()} Credentials', font = ("Helvetica", 25))
+        label = Label(pop_up, text = f'{service.capitalize()} Credentials Deleted', font = ("Helvetica", 25))
         label.pack(side = 'top', fill = 'x', pady = 10)
 
         list_box = Listbox(pop_up, font = ("Helvetica", 20), height = 4, width = 40)
@@ -427,8 +454,8 @@ class QuerryPage(Frame):
             password = decrypted_password.decode()
             self.success_pop_up(service_input, username, password)
             db.close()
-        except:
-            self.pop_up('Incorrect Password!')
+        except Exception as e:
+            self.pop_up(f'Password "{pass_entry}" incorrect!')
             db.close()
             return
 
