@@ -1,25 +1,12 @@
 # Credentials_DB
 
 ## Intro 
-This program acts as a password and username manager. A light-weight database is created and inputs stored one entry at a time. 
-The user is prompted for a password used to encrypt the data. Then prompted for a service name (Reddit, Facebook, bank account, etc.), a username, and a password.
+This program acts as a password and username manager. A light-weight database is created and inputs are encrypted with a password supplied by the user. Then each set of credentials is stored one entry at a time.
+The idea is that the user can store each set of credentials with a unique password or instead use one good password to manage all their credentials.  
 
 
-### Setup 
-Run the make_db file to create the database in the same directory. Then just run the credentials program whenever you need to interact with the db. 
+### Setup
+There are two executable files. 'Credentials' is a command-line based version. 'Credentials_GUI' is a simple graphical version built with Pythons Tkinter module. Place them on your desktop and double click to open. 
 
 ### Security
-Currently, the encryption salt is hardcoded. This isn't the most secure solution since a rainbow table for the given salt could be made
-and reduce the difficulty to crack the password for a given entry. To eliminate this risk I plan to prompt the user for a salt on every entry,
-this reduces the ease of use for the user giventhat they need to provide a password and slat every time they want to make a query.
-Saving an encrypted version of the salt that the user provides could be the right solution. 
-
-
-
-
-
-
-
-
-
-
+While this is not the most secure credentials manager ever built, it is miles safer than storing any passwords or usernames in plain text. Since this program is not exposed to the web, any attempts of intrusion would require someone having full access to your computer. And even then, they would need to go about breaking the encryption. 
