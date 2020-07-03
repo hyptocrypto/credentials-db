@@ -178,13 +178,13 @@ class ShowSavedServices(Frame):
             db.close()
             pop_up.mainloop()
 
-    def success_pop_up(self, service, username, password):
+    def success_pop_up(self, service, username, password, action):
         pop_up = Tk()
         pop_up.geometry('600x200')
 
 
         pop_up.wm_title(' SUCCESS !')
-        label = Label(pop_up, text = f'{service.capitalize()} Credentials', font = ("Helvetica", 25))
+        label = Label(pop_up, text = f'{service.capitalize()} Credentials {action}', font = ("Helvetica", 25))
         label.pack(side = 'top', fill = 'x', pady = 10)
 
         list_box = Listbox(pop_up, font = ("Helvetica", 20), height = 4, width = 40)
@@ -320,7 +320,7 @@ class AddPage(Frame):
         
         # Check if the service name already exists in the data base  
         if service_entry in service_list:
-            self.pop_up('Sercive already exists!! please try again!')
+            self.pop_up(f'Sercive "{service_entry}" already exists. Please try again.')
             db.close()
             return
 
@@ -397,13 +397,13 @@ class QuerryPage(Frame):
         db.close()
         pop_up.mainloop()  
     
-    def success_pop_up(self, service, username, password):
+    def success_pop_up(self, service, username, password, action):
         pop_up = Tk()
         pop_up.geometry('600x200')
 
 
         pop_up.wm_title(' SUCCESS !')
-        label = Label(pop_up, text = f'{service.capitalize()} Credentials', font = ("Helvetica", 25))
+        label = Label(pop_up, text = f'{service.capitalize()} Credentials {action}', font = ("Helvetica", 25))
         label.pack(side = 'top', fill = 'x', pady = 10)
 
         list_box = Listbox(pop_up, font = ("Helvetica", 20), height = 4, width = 40)
@@ -465,10 +465,10 @@ class QuerryPage(Frame):
             decrypted_password = f.decrypt(encrypted_password)
             username = decrypted_username.decode()
             password = decrypted_password.decode()
-            self.success_pop_up(service_input, username, password)
+            self.success_pop_up(service_input, username, password, '')
             db.close()
         except Exception as e:
-            self.pop_up(f'Password "{pass_entry}" incorrect!')
+            self.pop_up(f'Password "{pass_entry}" incorrect!\n {e}')
             db.close()
             return
 
@@ -518,7 +518,7 @@ class DeletePage(Frame):
         db.close()
         pop_up.mainloop()  
     
-    def success_pop_up(self, service, username, password):
+    def success_pop_up(self, service, username, password, action):
         pop_up = Tk()
         pop_up.geometry('600x200')
 
@@ -582,12 +582,12 @@ class DeletePage(Frame):
             decrypted_password = f.decrypt(encrypted_password)
             username = decrypted_username.decode()
             password = decrypted_password.decode()
-            delete =Credentials.delete().where(Credentials.service == service_input)
+            delete = Credentials.delete().where(Credentials.service == service_input)
             delete.execute()
-            self.success_pop_up(service_input, username, password)
+            self.success_pop_up(service_input, username, password, 'Deleted')
             db.close()
-        except:
-            self.pop_up('Incorect Password!')
+        except Exception as e:
+            self.pop_up(f'Password "{password}" incorrect! \n {e}')
             return
    
 
