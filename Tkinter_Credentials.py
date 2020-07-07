@@ -50,7 +50,8 @@ class Credentials_DB(Tk):
 class StartPage(Frame):
     def __init__(self, master):
         Frame.__init__(self, master)
-
+        
+        master.title('Credentials')
         ## Title
         welcome_label = Label(self, text = 'Welcome! \n Please make a selection', font = ("Helvetica", 30))
         welcome_label.pack()
@@ -95,26 +96,32 @@ class StartPage(Frame):
 class ShowSavedServices(Frame):
     def __init__(self, master):
         Frame.__init__(self, master)
-
-        ## Back button
-        back_button = Button(self, text = 'BACK', command = lambda: master.switch_frame(StartPage), height = 2, width = 5)
-        back_button.pack(anchor = NW)
-
-        ## Title
-        list_label = Label(self, text = 'Saved Services', font = ("Helvetica", 30))
-        list_label.pack()
-
+        master.title('Saved Services')
         db.connect()
 
-        ## Initialze a list box to list all the saved servieces 
-        list_box = Listbox(self, font = ("Helvetica", 25))
-        list_box.pack()
-
         ## Create list of saved service by querying databse
+        max_len = 0
         service_list = []
         for row in Credentials.select():
             service_list.append(row.service.capitalize())
+            if len(row.service) > max_len:
+                max_len = len(row.service)
         service_list.sort()
+        db.close()
+
+        ## Back button
+        back_button = Button(self, text = 'BACK', command = lambda: master.switch_frame(StartPage), height = 2, width = 6)
+        back_button.pack(anchor = NW)
+
+        ## Title
+        list_label = Label(self, text = 'Saved Services \n - - - - - - - - - - - -', font = ("Helvetica", 30))
+        list_label.pack()
+
+        
+
+        ## Initialze a list box to list all the saved servieces 
+        list_box = Listbox(self, font = ("Helvetica", 25), width = max_len + 5)
+        list_box.pack(padx = 50)
 
         ## List saved services into the list box initalized above
         for item in service_list:
@@ -122,22 +129,21 @@ class ShowSavedServices(Frame):
         db.close()
         
         def double_clicked(event):
-            decrypt_pop_up(self, f'Please enter the password used to save "{list_box.get(ANCHOR).lower()}" service')
+            decrypt_pop_up(self, f'Please enter the password used to save "{list_box.get(ANCHOR)}" service')
         list_box.bind('<Double-Button-1>', double_clicked)
 
 
 
-
-        select_button = Button(self, text = 'Select', command = lambda: decrypt_pop_up(self, f'Please enter the password used to save "{list_box.get(ANCHOR).lower()}" service'), height = 3, width = 15)
+        select_button = Button(self, text = 'Select', command = lambda: decrypt_pop_up(self, f'Please enter the password used to save "{list_box.get(ANCHOR)}" service'), height = 3, width = 15)
         select_button.pack(side = LEFT)
 
-        delete_button = Button(self, text = 'Delete', command = lambda: delete_pop_up(self, f'Please enter the password used to save "{list_box.get(ANCHOR).lower()}" service'), height = 3, width = 15)
+        delete_button = Button(self, text = 'Delete', command = lambda: delete_pop_up(self, f'Please enter the password used to save "{list_box.get(ANCHOR)}" service'), height = 3, width = 15)
         delete_button.pack(side = RIGHT)
 
 
         def decrypt_pop_up(self,msg):
             pop_up = Tk()
-            pop_up.geometry('600x180')
+            #pop_up.geometry('600x180')
             
             pop_up.wm_title('Retrieve Credentials')
             label = Label(pop_up, text = msg, font = ("Helvetica", 20), padx = 50)
@@ -162,7 +168,7 @@ class ShowSavedServices(Frame):
 
         def delete_pop_up(self,msg):
             pop_up = Tk()
-            pop_up.geometry('600x180')
+            #pop_up.geometry('600x180')
             
             pop_up.wm_title('Delete Service')
             label = Label(pop_up, text = msg, font = ("Helvetica", 20), padx = 50)
@@ -180,22 +186,20 @@ class ShowSavedServices(Frame):
 
     def success_pop_up(self, service, username, password, action):
         pop_up = Tk()
-        pop_up.geometry('600x200')
+        
 
-
+        ## Popup for successful decrypt
         pop_up.wm_title(' SUCCESS !')
-        label = Label(pop_up, text = f'{service.capitalize()} Credentials {action}', font = ("Helvetica", 25))
+        label = Label(pop_up, text = f'"{service.capitalize()}" Credentials {action}', font = ("Helvetica", 25), padx = 50)
         label.pack(side = 'top', fill = 'x', pady = 10)
 
         list_box = Listbox(pop_up, font = ("Helvetica", 20), height = 4, width = 40)
-        list_box.pack()
+        list_box.pack(padx = 50)
         cred_list = [f'Username:   {username}', f'Password:   {password}']
         
         for item in cred_list:
             list_box.insert(END, item)
         
-
-
         button1 = Button(pop_up, text = 'Okay', command = pop_up.destroy, height = 3, width = 15)
         button1.pack()
         db.close()
@@ -221,6 +225,7 @@ class ShowSavedServices(Frame):
 class AddPage(Frame):
     def __init__(self, master):
         Frame.__init__(self, master)
+        master.title('Add Service')
 
         ## Button to return to StartPage 
         back_button = Button(self, height = 1, width = 5, padx = 50, pady = 15, text = '<-- BACK  ', command = lambda: master.switch_frame(StartPage))
@@ -347,6 +352,7 @@ class AddPage(Frame):
 class QuerryPage(Frame):
     def __init__(self, master):
         Frame.__init__(self, master)
+        master.title('Retrive Credentials')
 
         ## Button to go back to StartPage
         back_buttion = Button(self, height = 1, width = 4, padx = 50, pady = 15, text = '<-- BACK  ', command = lambda: master.switch_frame(StartPage))
@@ -383,7 +389,7 @@ class QuerryPage(Frame):
         sumbit_button = Button(self, height = 1, width = 5, padx = 50, pady = 15, text = 'SUBMIT', command = lambda: self.decrypt_creds(query_entry.get(), pass_entry.get()))
         sumbit_button.pack()
 
-    ## Eorro popup window 
+    ## Error popup window 
     def pop_up(self,msg):
         pop_up = Tk()
         pop_up.geometry('600x180')
@@ -396,7 +402,8 @@ class QuerryPage(Frame):
         button1.pack()
         db.close()
         pop_up.mainloop()  
-    
+
+    ## Pop up for successful querry
     def success_pop_up(self, service, username, password, action):
         pop_up = Tk()
         pop_up.geometry('600x200')
@@ -459,7 +466,7 @@ class QuerryPage(Frame):
         f = Fernet(key)
 
         # Tries to decrypt with given password. If successful, decrypted username and password and displayed. 
-        # If the password was incorrect the progrma terminates to deter spamming password atempts. 
+       
         try:
             decrypted_username = f.decrypt(encrypted_username)
             decrypted_password = f.decrypt(encrypted_password)
@@ -480,14 +487,19 @@ class QuerryPage(Frame):
 class DeletePage(Frame):
     def __init__(self, master):
         Frame.__init__(self, master)
+        master.title('Delete Credentials')
+
+        ## Button to return to Start page
         back_buttion = Button(self, height = 1, width = 5, padx = 50, pady = 15, text = '<-- BACK  ', command = lambda: master.switch_frame(StartPage))
         back_buttion.pack(anchor = NW)
 
+        ## Title 
         title_label = Label(self, text = 'Delete Credentials', font = ('Helvetica', 26))
         title_label.pack()
         space_label = Label(self, text = '  ')
         space_label.pack()
 
+        ## Label and entry feild for service name
         delete_label = Label(self, text = 'Please enter the name of the service you would like to delete', padx = 50, font = ('Helvetica', 18))
         delete_label.pack()
         delete_entry = Entry(self, width = 40)
@@ -495,6 +507,7 @@ class DeletePage(Frame):
         space_label = Label(self, text = '  ')
         space_label.pack()
 
+        ## Label and entry feild for encryption password
         pass_label = Label(self, text = 'Please enter the encryption password used to save this service', padx = 50, font = ('Helvetica', 18))
         pass_label.pack()
         pass_entry = Entry(self, width = 40)
@@ -502,9 +515,11 @@ class DeletePage(Frame):
         space_label = Label(self, text = '  ')
         space_label.pack()
 
+        ## Button to submit 
         sumbit_button = Button(self, height = 1, width = 5, padx = 50, pady = 15, text = 'SUBMIT', command = lambda: self.delete_service(delete_entry.get(), pass_entry.get()))
         sumbit_button.pack()
 
+    ## Pop up for any errors 
     def pop_up(self,msg):
         pop_up = Tk()
         pop_up.geometry('600x180')
@@ -517,7 +532,8 @@ class DeletePage(Frame):
         button1.pack()
         db.close()
         pop_up.mainloop()  
-    
+        
+    ## Pop up for a successful deletion 
     def success_pop_up(self, service, username, password, action):
         pop_up = Tk()
         pop_up.geometry('600x200')
@@ -575,8 +591,7 @@ class DeletePage(Frame):
         key = base64.urlsafe_b64encode(kdf.derive(password)) 
         f = Fernet(key)
 
-        # Tries to decrypt with given password. If successful, password was correct. 
-        # If the password was incorrect the progrma terminates to deter spamming password atempts. 
+        # Tries to decrypt with given password. If successful, password was correct.  
         try:
             decrypted_username = f.decrypt(encrypted_username)
             decrypted_password = f.decrypt(encrypted_password)
